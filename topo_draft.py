@@ -1,14 +1,21 @@
 #!/usr/bin/env python
-
 from subprocess import call
 
 from mininet.cli import CLI
-from mininet.link import Intf, TCLink
-from mininet.log import info, setLogLevel
+from mininet.link import Intf
+from mininet.link import TCLink
+from mininet.log import info
+from mininet.log import setLogLevel
 from mininet.net import Mininet
-from mininet.node import (Controller, CPULimitedHost, Host, IVSSwitch, Node,
-                          OVSController, OVSKernelSwitch, RemoteController,
-                          UserSwitch)
+from mininet.node import Controller
+from mininet.node import CPULimitedHost
+from mininet.node import Host
+from mininet.node import IVSSwitch
+from mininet.node import Node
+from mininet.node import OVSController
+from mininet.node import OVSKernelSwitch
+from mininet.node import RemoteController
+from mininet.node import UserSwitch
 
 
 def myNetwork():
