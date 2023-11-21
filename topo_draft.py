@@ -33,11 +33,11 @@ def myNetwork():
     h4 = net.addHost('h4', cls=Host, ip='10.0.0.4', defaultRoute=None)
     
     info( '*** Add links\n')
-    net.addLink(h1, s1)
-    net.addLink(h2, s1)
-    net.addLink(h3, s1)
-    net.addLink(h4, s1)
-    net.addLink(s1, h5)
+    net.addLink(h1, s1, bw=1)
+    net.addLink(h2, s1, bw=1)
+    net.addLink(h3, s1, bw=1)
+    net.addLink(h4, s1, bw=1)
+    net.addLink(h5, s1)
 
     info( '*** Starting HTTP server on every host\n')
     h1.cmd('cd ~/proj/Draft/Server && python3 -m http.server 80 &')

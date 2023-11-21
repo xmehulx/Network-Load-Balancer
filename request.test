@@ -1,0 +1,5 @@
+#!/bin/bash
+
+for i in {1..60}; do
+    curl 10.0.0.2/bigfile -o bigfile.save 1>/dev/null
+    done
