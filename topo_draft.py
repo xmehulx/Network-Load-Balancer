@@ -12,6 +12,7 @@ from mininet.node import (Controller, CPULimitedHost, Host, IVSSwitch, Node,
 
 
 def myNetwork():
+    """ """
     net = Mininet(topo=None, build=False, ipBase="10.0.0.0/8")
 
     info("*** Adding controller\n")
