@@ -11,6 +11,7 @@
 
 # Check conditions using if, elif, and else
 for i in {1..60}; do
+<<<<<<< HEAD
     random_number=$((RANDOM % 4))
     if [ "$random_number" -eq 0 ]; then
 #        echo $random_number
@@ -26,3 +27,7 @@ for i in {1..60}; do
         curl 10.0.0.2/vsmfile -o vsmfile.save 1>/dev/null
     fi
     done
+=======
+  curl 10.0.0.2/bigfile -o bigfile.save 1>/dev/null
+done
+>>>>>>> 4ac1f842689b3876ea37ea50b125796a3cddaf45
