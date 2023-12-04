@@ -1,33 +1,16 @@
 #!/bin/bash
 	
-# Generate a random number between 1 and 100
-
-
-
-#for i in {1..2}; do
-#    curl 10.0.0.2/smallfile -o smallfile.save 1>/dev/null
-#    done
-
 
 # Check conditions using if, elif, and else
-for i in {1..60}; do
-<<<<<<< HEAD
-    random_number=$((RANDOM % 4))
+for i in {1..100}; do
+    random_number=$((RANDOM % 7))
     if [ "$random_number" -eq 0 ]; then
-#        echo $random_number
-        curl 10.0.0.2/bigfile -o bigfile.save 1>/dev/null
-    elif [ "$random_number" -eq 1 ]; then
-#        echo $random_number
-        curl 10.0.0.2/medfile -o medfile.save 1>/dev/null
-    elif [ "$random_number" -eq 2 ]; then
-#        echo $random_number
-        curl 10.0.0.2/smallfile -o smallfile.save 1>/dev/null
+        curl 10.0.0.1/bigfile > bigfile.save
+    elif [ "$random_number" -le 2 ]; then
+        curl 10.0.0.1/medfile > medfile.save
+    elif [ "$random_number" -le 4 ]; then
+        curl 10.0.0.1/smallfile > smallfile.save
     else
-#        echo $random_number
-        curl 10.0.0.2/vsmfile -o vsmfile.save 1>/dev/null
+        curl 10.0.0.1/vsmfile > vsmfile.save
     fi
-    done
-=======
-  curl 10.0.0.2/bigfile -o bigfile.save 1>/dev/null
 done
->>>>>>> 4ac1f842689b3876ea37ea50b125796a3cddaf45
