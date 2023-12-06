@@ -48,7 +48,6 @@ def myNetwork():
     net.addLink(h5, s1, cls=TCLink, bw=10)
 
     info("*** Starting HTTP server on every host\n")
-    #h1.cmd("cd ~/proj/Draft/Server && python3 -m http.server 80 &")
     h1.cmd("python3 Server/server1.py &")
     h2.cmd("python3 Server/server2.py &")
     h3.cmd("python3 Server/server3.py &")

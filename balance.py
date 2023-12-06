@@ -4,8 +4,12 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 import requests
 import logging
 
+
 # Configure logging
 logging.basicConfig(filename='/home/mininet/proj/Network-Load-Balancer/lb.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+link_utils = [0,0,0]
+#c = 0 
 
 class ProxyHandler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -15,21 +19,53 @@ class ProxyHandler(BaseHTTPRequestHandler):
         self.proxy_request()
 
     def proxy_request(self):
+#        global c
         # Set the target IP address and port
         target_host = "10.0.0.1"  # Replace with the actual IP address
-        arr=['10.0.0.1','10.0.0.2','10.0.0.3', '10.0.0.4']
+        arr=['10.0.0.1','10.0.0.2','10.0.0.3', "10.0.0.4"]
         target_port = 80  # Server listening port
+        
+#        #RR   
+#        target_url = f"http://{arr[c%2]}:{target_port}{self.path}"
+#        c+=1
+#        print(f"c:{c} Target server: {target_url}")
 
         # Build the target URL
         if (self.path=='/bigfile'):
             target_url = f"http://{arr[3]}:{target_port}{self.path}"
         else:
-            with open('/home/mininet/proj/Network-Load-Balancer/Server/status/status1.txt', 'r') as status_file:
-                status_content = status_file.read().strip()
-                if status_content == '0':
-                    target_url = f"http://{arr[0]}:{target_port}{self.path}"
-                else:
-                    target_url = f"http://{arr[1]}:{target_port}{self.path}"
+            for i in range(0,3):
+                try:
+                    filename = f"/home/mininet/proj/Network-Load-Balancer/Server/status/status{i+1}.txt"
+                    with open(filename, 'r') as file:
+                        # Read the decimal number from the file and convert it to float
+                        link_util = float(file.read().strip())                   
+                        link_utils[i] = link_util
+            
+                except FileNotFoundError:
+                    print(f"File not found: {filename}")
+                except ValueError:
+                    print(f"Invalid data in {filename}. It should contain a single decimal number.")
+            
+            free_server = link_utils.index(min(link_utils))
+            #print(f"free server is {free_server}")
+            target_url = f"http://{arr[free_server]}:{target_port}{self.path}"
+#                
+#        print(link_utils)
+
+
+
+#            with open('/home/mininet/proj/Network-Load-Balancer/Server/status/status1.txt', 'r') as status_file:
+#                status_content = status_file.read().strip()
+#                if (int(float(status_content)) < 600):
+#                    target_url = f"http://{arr[0]}:{target_port}{self.path}"
+#                else:
+#                    with open('/home/mininet/proj/Network-Load-Balancer/Server/status/status2.txt', 'r') as status_file:
+#                        status_content = status_file.read().strip()
+#                        if status_content == '0':
+#                            target_url = f"http://{arr[1]}:{target_port}{self.path}"
+#                        else:
+#                            target_url = f"http://{arr[2]}:{target_port}{self.path}"   
 
         try:
             # Log the incoming request
@@ -61,6 +97,8 @@ class ProxyHandler(BaseHTTPRequestHandler):
             # Send an error response back to the client
             self.send_error(500, "Error forwarding request to the target server")
 
+    
+
 if __name__ == "__main__":
     PORT = 80  # Change this to the desired port
     handler = ProxyHandler
@@ -76,5 +114,3 @@ if __name__ == "__main__":
 
     httpd.server_close()
     logging.info("Proxy server stopped")
-
-
