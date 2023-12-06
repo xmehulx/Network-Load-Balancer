@@ -1,40 +1,80 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
-import socket
+from http.server import BaseHTTPRequestHandler, HTTPServer
+import requests
+import logging
 
-# Create a socket object
-sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+# Configure logging
+logging.basicConfig(filename='/home/mininet/proj/Network-Load-Balancer/lb.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-# Bind the socket to a port
-sock.bind(("10.0.0.254", 80))
+class ProxyHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.proxy_request()
 
-# Listen for incoming connections
-sock.listen(5)
+    def do_POST(self):
+        self.proxy_request()
 
-while True:
-    # Accept an incoming connection
-    client_sock, client_addr = sock.accept()
-    #D print("Received connection from", client_addr)
+    def proxy_request(self):
+        # Set the target IP address and port
+        target_host = "10.0.0.1"  # Replace with the actual IP address
+        arr=['10.0.0.1','10.0.0.2','10.0.0.3', '10.0.0.4']
+        target_port = 80  # Server listening port
 
-    # Choose a server to forward the connection to
-    server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_sock.connect(("10.0.0.1", 80))
+        # Build the target URL
+        if (self.path=='/bigfile'):
+            target_url = f"http://{arr[3]}:{target_port}{self.path}"
+        else:
+            with open('/home/mininet/proj/Network-Load-Balancer/Server/status/status1.txt', 'r') as status_file:
+                status_content = status_file.read().strip()
+                if status_content == '0':
+                    target_url = f"http://{arr[0]}:{target_port}{self.path}"
+                else:
+                    target_url = f"http://{arr[1]}:{target_port}{self.path}"
 
-    # Forward the connection
-    #D server_sock.sendall(client_sock.recv(1024))
-    while True:
-        # Client > Server
-        data = client_sock.recv(1024)
-        if not data:
-            break
-        server_sock.sendall(data)
+        try:
+            # Log the incoming request
+            logging.info(f"Incoming Request: {self.path} - {self.client_address[0]}")
 
-        # Server > Client
-        data = server_sock.recv(1024)
-        if not data:
-            break
-        client_sock.sendall(data)
+            # Forward the request to the target server
+            if self.headers.get('Content-Length'):
+                content_length = int(self.headers['Content-Length'])
+                request_data = self.rfile.read(content_length)
+                response = requests.post(target_url, data=request_data, headers=dict(self.headers))
+            else:
+                response = requests.get(target_url, headers=dict(self.headers))
+
+            # Log the response and the server that served the request
+            logging.info(f"Response: {response.status_code} - Served by: {target_url}")
+
+            # Send the response back to the client
+            self.send_response(response.status_code)
+            for header, value in response.headers.items():
+                self.send_header(header, value)
+            self.end_headers()
+
+            self.wfile.write(response.content)
+
+        except Exception as e:
+            # Log errors
+            logging.error(f"Error: {str(e)}")
+
+            # Send an error response back to the client
+            self.send_error(500, "Error forwarding request to the target server")
+
+if __name__ == "__main__":
+    PORT = 80  # Change this to the desired port
+    handler = ProxyHandler
+    httpd = HTTPServer(("", PORT), handler)
+
+    print("Proxy server running on port", PORT)
+    logging.info("Proxy server running on port %d", PORT)
     
-    # Close the connections
-    client_sock.close()
-    server_sock.close()
+    try:
+        httpd.serve_forever()
+    except KeyboardInterrupt:
+        pass
+
+    httpd.server_close()
+    logging.info("Proxy server stopped")
+
+
