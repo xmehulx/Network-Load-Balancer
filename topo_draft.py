@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python3
 from subprocess import call
 
 from mininet.cli import CLI
@@ -43,15 +43,17 @@ def myNetwork():
     net.addLink(h1, s1, cls=TCLink, bw=1)
     net.addLink(h2, s1, cls=TCLink, bw=1)
     net.addLink(h3, s1, cls=TCLink, bw=1)
-    net.addLink(h4, s1, cls=TCLink, bw=1)
+    net.addLink(h4, s1, cls=TCLink, bw=5)
     net.addLink(h6, s1, cls=TCLink, bw=10)
     net.addLink(h5, s1, cls=TCLink, bw=10)
 
     info("*** Starting HTTP server on every host\n")
-    h1.cmd("cd ~/proj/Draft/Server && python3 -m http.server 80 &")
-    h2.cmd("cd ~/proj/Draft/Server && python3 -m http.server 80 &")
-    h3.cmd("cd ~/proj/Draft/Server && python3 -m http.server 80 &")
-    h4.cmd("cd ~/proj/Draft/Server && python3 -m http.server 80 &")
+    #h1.cmd("cd ~/proj/Draft/Server && python3 -m http.server 80 &")
+    h1.cmd("python3 Server/server1.py &")
+    h2.cmd("python3 Server/server2.py &")
+    h3.cmd("python3 Server/server3.py &")
+    h4.cmd("python3 Server/server4.py &")
+    h6.cmd("python3 balance.py &")
 
     info("*** Starting network\n")
     net.build()
@@ -63,7 +65,7 @@ def myNetwork():
     net.get("s1").start([c0])
 
     info("*** Post configure switches and hosts\n")
-    
+    net.pingAll()
     CLI(net)
     net.stop()
 
